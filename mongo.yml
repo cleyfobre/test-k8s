@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mongo-deployment
+  labels:
+    app: mymongo
+spec:
+  # 아래 pod(template)를 몇 개 생성할 것인가?
+  replicas: 1
+  selector:
+    matchLabels:
+      # 위에 mymongo에 매칭된다.
+      app: mymongo
+  template:
+    metadata:
+      labels:
+        # 위에 mymongo에 매칭된다.
+        app: mymongo
+    spec:
+      containers:
+        - name: mongodb
+          image: mongo:5.0
+          ports:
+            - containerPort: 27017
+          # secret 정보를 mongo deployment에 주입한다.
+          env:
+            - name: MONGO_INITDB_ROOT_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: mymongo-secret
+                  key: mongo-user
+            - name: MONGO_INITDB_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mymongo-secret
+                  key: mongo-password
+
+---
+# yml에서는 '---'를 사용함으로써 한 파일에 여러 설정이 가능하다.
+apiVersion: v1
+kind: Service
+metadata:
+  name: mymongo-service
+spec:
+  # 'type' is cluster ip as a default
+  # type: ClusterIP
+  selector:
+    # 위에 설정한 pod로 보낼 것이기에 mymongo로 매칭시켜 준다.
+    app: mymongo
+  ports:
+    - protocol: TCP
+      # 외부테서 접근을 허용하는 port (마음대로)
+      port: 27017
+      # 위 mongodb 컨테이너의 port
+      targetPort: 27017

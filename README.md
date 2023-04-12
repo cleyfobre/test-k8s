@@ -34,6 +34,11 @@ kubectl logs webapp-deployment-54957cb9dc-k8kqp
 kubectl logs webapp-deployment-54957cb9dc-k8kqp -f
 ```
 
+### minikube service 시작
+```agsl
+minikube service mywebapp-service
+```
+
 ### 브라우져에서 확인
 - 서비스에서 포트 확인
 ```agsl
